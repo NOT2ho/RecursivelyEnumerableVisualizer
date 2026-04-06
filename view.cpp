@@ -70,7 +70,6 @@ View::View(QWidget *parent)
     labelLayout->addWidget(label2);
     labelLayout->addWidget(selectModeButton);
     labelLayout->addWidget(dragModeButton);
-    labelLayout->addStretch();
     labelLayout->addWidget(printButton);
 
     QGridLayout *topLayout = new QGridLayout;

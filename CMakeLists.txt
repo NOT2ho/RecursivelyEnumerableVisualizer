@@ -21,12 +21,13 @@ qt_add_qml_module(appinfinitelyLazy
         SOURCES valuearray2d.h valuearray2d.cpp
         SOURCES
         SOURCES view.h view.cpp
-        SOURCES mainwindow.h mainwindow.cpp
+        SOURCES visualize2d.h visualize2d.cpp
         SOURCES
         SOURCES drawpixel.h drawpixel.cpp
         RESOURCES drawpixel.pro
         SOURCES
         SOURCES linetextframe.h linetextframe.cpp
+        SOURCES mainwindow.h mainwindow.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
