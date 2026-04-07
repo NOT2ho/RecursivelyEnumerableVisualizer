@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu *fileMenu = new QMenu("file", this);
     QMenu *helpMenu = new QMenu("help", this);
     QAction *saveasimageAct = new QAction("save as image", this);
+
+    QAction *saveasimagesequenceAct = new QAction("save as image sequence", this);
     QAction *helpAct = new QAction("help..", this);
     QAction *seemoreAct = new QAction("see more..", this);
 
@@ -28,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(seemoreAct, &QAction::triggered, this, [this](){this->seeSeemore();});
 
     fileMenu->addAction(saveasimageAct);
+
+    fileMenu->addAction(saveasimagesequenceAct);
     helpMenu->addAction(helpAct);
     helpMenu->addAction(seemoreAct);
     windowMenu->addAction(add2dtabAct);
@@ -56,6 +60,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(saveasimageAct, &QAction::triggered, this, [this](){saveasimage();});
 
 
+    connect(saveasimagesequenceAct, &QAction::triggered, this, [this](){saveasimagesequence();});
+
+
 }
 
 void MainWindow::seeHelp() {
@@ -77,6 +84,19 @@ void MainWindow::saveasimage() {
     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
     if (active->savable) {
         auto isSaved = active->saveImage();
+        if (!isSaved)
+        {
+            showMsgBox("실패", "저장 실패");
+        }
+    }
+}
+
+void MainWindow::saveasimagesequence() {
+    auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
+    //if (active->DIM != 3) showMsgBox("실패", "ㅠㅜㅠ");
+   // else
+        if (active->savable) {
+        auto isSaved = active->saveImages();
         if (!isSaved)
         {
             showMsgBox("실패", "저장 실패");

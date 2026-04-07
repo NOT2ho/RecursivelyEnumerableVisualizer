@@ -217,8 +217,6 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
 
 }
 
-
-
 bool Visualize3D::saveImage () {
     if (savable) {
         QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
@@ -233,6 +231,36 @@ bool Visualize3D::saveImage () {
         return false;
     }
 }
+
+
+
+bool Visualize3D::saveImages () {
+
+    if (savable) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "\\",
+                                                        tr("Images (*.bmp, *.png, *.jpg)"));
+
+        QString basename = QFileInfo(fileName).baseName();
+        QString extension = QFileInfo(fileName).suffix();
+        QString path = QFileInfo(fileName).path();
+        bool saved = true;
+        int i = 0;
+        for (QImage *frame : imageSequence ) {
+            QString frameName = QDir::cleanPath(path + QDir::separator() + basename + "_" + QString::number(i) + "." + extension);
+            saved = saved && frame->save(frameName, 0, 100);
+            i++;
+        }
+        return saved;
+    }
+    else {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("?"));
+        msgBox.exec();
+        return false;
+    }
+}
+
 
 void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, int z, QGraphicsScene *scene)
 {

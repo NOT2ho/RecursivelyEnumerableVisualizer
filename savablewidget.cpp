@@ -7,3 +7,8 @@ SavableWidget::SavableWidget(QWidget *parent, int dimension)
 bool SavableWidget::saveImage() {
     return false;
 }
+
+bool SavableWidget::saveImages() {
+    return false;
+}
+

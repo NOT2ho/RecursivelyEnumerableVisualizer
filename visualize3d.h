@@ -18,6 +18,7 @@ class Visualize3D : public SavableWidget
 public:
     Visualize3D(QWidget *parent = nullptr, int dimension = 3);
     bool saveImage () override;
+    bool saveImages () override;
 
 private:
     std::vector<QGraphicsScene *> makeFrames(QString sf, QString sf2, std::vector<int> dom);
