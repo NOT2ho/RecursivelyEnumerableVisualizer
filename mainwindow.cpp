@@ -13,11 +13,16 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     QMenuBar *menuBar = new QMenuBar(this);
+
+    QMenu *windowMenu = new QMenu("window", this);
     QMenu *fileMenu = new QMenu("file", this);
     QMenu *helpMenu = new QMenu("help", this);
     QAction *saveasimageAct = new QAction("save as image", this);
     QAction *helpAct = new QAction("help..", this);
     QAction *seemoreAct = new QAction("see more..", this);
+
+    QAction *add2dtabAct = new QAction("add 2d tab", this);
+    QAction *add3dtabAct = new QAction("add 3d tab", this);
     menuBar->addMenu(fileMenu);
     connect(helpAct, &QAction::triggered, this, [this](){this->seeHelp();});
     connect(seemoreAct, &QAction::triggered, this, [this](){this->seeSeemore();});
@@ -25,25 +30,36 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction(saveasimageAct);
     helpMenu->addAction(helpAct);
     helpMenu->addAction(seemoreAct);
+    windowMenu->addAction(add2dtabAct);
+    windowMenu->addAction(add3dtabAct);
+
+    menuBar->addMenu(windowMenu);
     menuBar->addMenu(helpMenu);
     this->setMenuBar(menuBar);
 
     Visualize2D *vis2d = new Visualize2D(this);
     Visualize3D *vis3d = new Visualize3D(this);
 
-    QTabWidget *tabWidget = new QTabWidget(this);
-
+    tabWidget = new QTabWidget(this);
+    tabWidget->setTabsClosable(true);
     tabWidget->addTab(vis2d, tr("2d vis"));
     tabWidget->addTab(vis3d, tr("3d vis"));
     this->setCentralWidget(tabWidget);
 
-    connect(saveasimageAct, &QAction::triggered, this, [this, tabWidget](){this->saveasimage(tabWidget->currentWidget());});
+
+    connect(add2dtabAct, &QAction::triggered, this, [this](){
+            this->tabWidget->addTab(new Visualize2D(this), tr("2d vis"));});
+    connect(add3dtabAct, &QAction::triggered, this, [this](){
+        this->tabWidget->addTab(new Visualize3D(this), tr("3d vis"));});
+
+
+    connect(saveasimageAct, &QAction::triggered, this, [this](){saveasimage();});
 
 
 }
 
 void MainWindow::seeHelp() {
-    showMsgBox("도움", "JavaScript를 사용하여 함수를 입력하세요. 입출력이 자연수인지, 인자 수가 정확한지를 확인하세요. 하단의 입력창에서 범위를 설정할 수 있습니다.")
+    showMsgBox("도움", "JavaScript를 사용하여 함수를 입력하세요. 입출력이 자연수인지, 인자 수가 정확한지를 확인하세요. 하단의 입력창에서 범위를 설정할 수 있습니다.");
 }
 
 void MainWindow::seeSeemore() {
@@ -57,10 +73,10 @@ void MainWindow::showMsgBox(QString title, QString text) {
     msgBox.exec();
 }
 
-void MainWindow::saveasimage(QWidget *widget) {
-    auto *actived = dynamic_cast<SavableWidget *>(widget);
-    if (actived->savable) {
-        auto isSaved = actived->saveImage();
+void MainWindow::saveasimage() {
+    auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
+    if (active->savable) {
+        auto isSaved = active->saveImage();
         if (!isSaved)
         {
             showMsgBox("실패", "저장 실패");

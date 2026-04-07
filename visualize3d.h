@@ -17,7 +17,7 @@ class Visualize3D : public SavableWidget
     Q_OBJECT
 public:
     Visualize3D(QWidget *parent = nullptr, int dimension = 3);
-
+    bool saveImage () override;
 
 private:
     std::vector<QGraphicsScene *> makeFrames(QString sf, QString sf2, std::vector<int> dom);
@@ -26,6 +26,11 @@ private:
     View *view;
     QWidget *visualize3d;
     QSlider *timeSlider;
+    QImage *currentImage;
+    std::vector<QImage *> imageSequence;
+    int width;
+    int height;
+    int tRange;
 };
 
 #endif // VISUALIZE3D_H

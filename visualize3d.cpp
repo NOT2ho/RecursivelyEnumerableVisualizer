@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <QtLogging>
 #include <qtimer.h>
+#include<qfiledialog.h>
 #include <qtoolbutton.h>
 
 Visualize3D::Visualize3D(QWidget *parent, int dimension)
@@ -101,11 +102,13 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
             textInput2->toPlainText(),
             { x1, x2, y1, y2, z1, z2});
             setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            savable = true;
         }
         else {
                 QMessageBox msgBox(this);
                 msgBox.setText(tr("범위는 %1보다 작은 자연수여야 합니다. 자연수는 0부터 시작합니다. 너무 큰 수를 넣으면 어떻게 될지는 모릅니다.").arg(MAX_DOMAIN_RANGE));
                 msgBox.exec();
+                savable = false;
             }
     });
 
@@ -212,10 +215,31 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
 
 }
 
+
+
+bool Visualize3D::saveImage () {
+    if (savable) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "\\",
+                                                        tr("Images (*.bmp, *.png, *.jpg)"));
+        return currentImage->save(fileName, 0, 100);
+    }
+    else {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("?"));
+        msgBox.exec();
+        return false;
+    }
+}
+
 void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, int z, QGraphicsScene *scene)
 {
     scene->clear();
-    scene->setSceneRect(0, 0, ( dom[1]-dom[0]) *10, ( dom[3]-dom[2]) *10);
+    width = dom[1]-dom[0];
+    height = dom[3]-dom[2];
+    scene->setSceneRect(0, 0, width *10, height *10);
+    QImage *image = new QImage(width, height, QImage::Format::Format_ARGB32);
+    image->fill(0x00000000);
     valueArray3D valarr = valueArray3D(sf, sf2);
     QJSEngine engine;
     QJSValueList lst;
@@ -224,18 +248,21 @@ void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, i
     for (int i = dom[0]*10; i < dom[1]*10; i += 10) {
         int yy = dom[2];
         for (int j = dom[2]*10; j < dom[3]*10; j += 10) {
-            QColor color(valarr.getColor(valarr.getValue(xx,yy,z)));
-            DrawPixel *item = new DrawPixel(color, xx, yy, z, valarr.getValue(xx,yy,z));
+            auto val = valarr.getValue(xx,yy,z);
+            QColor color(valarr.getColor(val));
+            DrawPixel *item = new DrawPixel(color, xx, yy, z, val);
             item->setPos(QPointF(i, j));
             scene->addItem(item);
+            image->setPixelColor(QPoint(xx - dom[0], yy - dom[2]), color);
+            imageSequence.push_back(image);
             yy++;
         }
         xx++;
     }
-
-
-
 }
+
+
+
 
 
 std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
@@ -254,6 +281,7 @@ std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, s
     timeSlider->setTickPosition(QSlider::TicksBelow);
     connect(timeSlider, &QAbstractSlider::valueChanged, this, [this, scenes]() {
             this->view->graphicsView->setScene(scenes[timeSlider->value()]);
+            this->currentImage = imageSequence[timeSlider->value()];
     });
     this->view->graphicsView->setScene(scenes[timeSlider->value()]);
 

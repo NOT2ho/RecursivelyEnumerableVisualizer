@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "savablewidget.h"
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow
@@ -12,8 +13,9 @@ public:
 private:
     void seeHelp();
     void seeSeemore();
-    void saveasimage(QWidget *widget);
+    void saveasimage();
     void showMsgBox(QString title, QString text);
+    QTabWidget *tabWidget;
 signals:
 
 };

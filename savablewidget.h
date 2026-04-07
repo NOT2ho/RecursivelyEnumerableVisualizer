@@ -14,6 +14,7 @@ public:
     const int DIM;
     virtual bool saveImage() ;
 
+
 signals:
 };
 
