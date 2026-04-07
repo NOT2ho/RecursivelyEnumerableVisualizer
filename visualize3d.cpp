@@ -1,8 +1,9 @@
-#include "linetextframe.h"
 #include "drawpixel.h"
+#include "linetextframe.h"
+#include "visualize3d.h"
+#include "valuearray3d.h"
 #include "visualize2d.h"
 #include "view.h"
-#include "valuearray2d.h"
 #include <QHBoxLayout>
 #include <QSplitter>
 #include<QDebug>
@@ -12,18 +13,22 @@
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include<QMenuBar>
+#include <qslider.h>
+#include <algorithm>
+#include <QtLogging>
+#include <qtimer.h>
+#include <qtoolbutton.h>
 
-Visualize2D::Visualize2D(QWidget *parent)
-    : QWidget(parent), scene(new QGraphicsScene(this)), MAX_DOMAIN_RANGE (500)
+Visualize3D::Visualize3D(QWidget *parent, int dimension)
+    : SavableWidget(parent), timeSlider(new QSlider(Qt::Orientation::Horizontal, this)), view(new View()), MAX_DOMAIN_RANGE (500)
 
 {
 
 
-    View *view = new View();
-    view->graphicsView->setScene(scene);
-
+    visualize3d = new QWidget(view);
     QFont font ("Ubuntu Mono");
     font.setStyleHint(QFont::Monospace);
+
 
 
     QFont labelFont ("");
@@ -49,9 +54,9 @@ Visualize2D::Visualize2D(QWidget *parent)
 
     QLabel *textInputDesc = new QLabel(this);
     textInputDesc->setFrameStyle(QFrame::NoFrame | QFrame::NoFrame);
-    textInputDesc->setText("\"main\": N × N -> N 함수를 만드세요.");
+    textInputDesc->setText("\"main\": N × N × N -> N 함수를 만드세요.");
     textInputDesc->setWordWrap(true);
-    textInputLabel->setAlignment(Qt::AlignLeft);
+    textInputDesc->setAlignment(Qt::AlignLeft);
 
     QLabel *textInput2Label = new QLabel(this);
     textInput2Label->setFrameStyle(QFrame::NoFrame | QFrame::NoFrame);
@@ -64,36 +69,39 @@ Visualize2D::Visualize2D(QWidget *parent)
     textInput2Desc->setFrameStyle(QFrame::NoFrame | QFrame::NoFrame);
     textInput2Desc->setText("\"main\": N -> N 함수를 만드세요.");
     textInput2Desc->setWordWrap(true);
-    textInput2Label->setAlignment(Qt::AlignLeft);
+    textInput2Desc->setAlignment(Qt::AlignLeft);
 
     LineTextFrame *lineEditx1 = new LineTextFrame(this);
     LineTextFrame *lineEditx2 = new LineTextFrame(this);
     LineTextFrame *lineEdity1 = new LineTextFrame(this);
     LineTextFrame *lineEdity2 = new LineTextFrame(this);
+    LineTextFrame *lineEditz1 = new LineTextFrame(this);
+    LineTextFrame *lineEditz2 = new LineTextFrame(this);
 
-    textInput->setPlainText("main: (x, y) => { \n\tfunction calc(x, y) { \n\t\treturn x + y \n\t} \n return calc(x, y) \n}");
+    textInput->setPlainText("main: (x, y, z) => { \n\tfunction calc(x, y, z) { \n\t\treturn x + y + z\n\t} \n return calc(x, y, z) \n}");
     textInput2->setPlainText("main: (i) => {\n\tfunction color(i) {\n\t\tlet c = i % 256\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}");
 
 
 
     QPushButton *button = new QPushButton("&Enter", this);
-    connect(button, &QPushButton::clicked, this,  [this, textInput, textInput2, lineEditx1, lineEditx2, lineEdity1, lineEdity2, view] () {
-        bool *ok = new bool();
-        bool *ok2 = new bool();
-        bool *ok3 = new bool();
-        bool *ok4 = new bool();
-        int x1 = lineEditx1->lineEdit->text().toInt(ok);
-        int x2 = lineEditx2->lineEdit->text().toInt(ok2);
-        int y1 = lineEdity1->lineEdit->text().toInt(ok3);
-        int y2 = lineEdity2->lineEdit->text().toInt(ok4);
+    connect(button, &QPushButton::clicked, this,  [this, textInput, textInput2, lineEditx1, lineEditx2, lineEdity1, lineEdity2, lineEditz1, lineEditz2] () {
+        std::vector<bool *> ok{ new bool(), new bool(), new bool(), new bool(), new bool(), new bool()};
+        int x1 = lineEditx1->lineEdit->text().toInt(ok[0]);
+        int x2 = lineEditx2->lineEdit->text().toInt(ok[1]);
+        int y1 = lineEdity1->lineEdit->text().toInt(ok[2]);
+        int y2 = lineEdity2->lineEdit->text().toInt(ok[3]);
+        int z1 = lineEditz1->lineEdit->text().toInt(ok[4]);
+        int z2 = lineEditz2->lineEdit->text().toInt(ok[5]);
+        bool allOk = std::all_of(ok.begin(), ok.end(), [](bool *x){return *x;});
         auto isInRange = [this](int x) { return x >= 0 && x < MAX_DOMAIN_RANGE; };
-        if (x1 >= 0 && y1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && *ok && *ok2 && *ok3 && *ok4) {
-            view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4").arg(x1).arg(x2).arg(y1).arg(y2));
-            populateScene (
+        if (x1 >= 0 && y1 >= 0 && z1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && isInRange(z2 - z1) && allOk) {
+            this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            makeFrames(
             textInput->toPlainText(),
             textInput2->toPlainText(),
-            { x1, x2, y1, y2 });
-            }
+            { x1, x2, y1, y2, z1, z2});
+            setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+        }
         else {
                 QMessageBox msgBox(this);
                 msgBox.setText(tr("범위는 %1보다 작은 자연수여야 합니다. 자연수는 0부터 시작합니다. 너무 큰 수를 넣으면 어떻게 될지는 모릅니다.").arg(MAX_DOMAIN_RANGE));
@@ -102,6 +110,7 @@ Visualize2D::Visualize2D(QWidget *parent)
     });
 
     button->setFixedSize(QSize(100, 30));
+
 
 
     QVBoxLayout *textInputlayout = new QVBoxLayout();
@@ -121,9 +130,57 @@ Visualize2D::Visualize2D(QWidget *parent)
     textInputBox->setLayout(textInputlayout);
     textInput2Box->setLayout(textInput2layout);
 
+    LineTextFrame *lineEditSetTimer = new LineTextFrame(this);
+    lineEditSetTimer->toGroupBox("15", "fps");
+
+    QToolButton *playButton = new QToolButton(this);
+    playButton->setText("▶");
+    connect(playButton, &QToolButton::clicked, this, [lineEditSetTimer, this] () {
+        bool *ok = new bool(false);
+        float fps = lineEditSetTimer->lineEdit->text().toFloat(ok);
+        int min = timeSlider->minimum();
+        int max = timeSlider->maximum();
+        if (*ok && fps > 0) {
+
+                QTimer *timer = new QTimer(this);
+                timer->setInterval(1/fps);
+                timer->start();
+                connect(timer, &QTimer::timeout, timer, [this, min, max, timer](){
+                    auto val = timeSlider->value();
+                    if (val < max) { timeSlider->setValue(val+1);
+                        //timer->start();
+                        qInfo() << val;
+                        }
+                    else {  timeSlider->setValue(min);
+                            timer->stop();
+                        }
+                });
+
+        }
+        else { QMessageBox msgBox(this);
+             msgBox.setText(tr("0보다 큰 실수를 넣으세요."));
+             msgBox.exec();
+        }
+    });
+
+    QHBoxLayout *timerLayout = new QHBoxLayout(this);
+    timerLayout->addWidget(timeSlider);
+    timerLayout->addWidget(lineEditSetTimer->groupBox);
+    timerLayout->addWidget(playButton);
+
+    QGroupBox *timerLayoutBox = new QGroupBox(this);
+    timerLayoutBox->setLayout(timerLayout);
+
+    QVBoxLayout *viewLayout = new QVBoxLayout(this);
+    viewLayout->addWidget(view);
+    viewLayout->addWidget(timerLayoutBox);
+
+    QGroupBox *viewLayoutBox = new QGroupBox(this);
+    viewLayoutBox->setLayout(viewLayout);
+
     QSplitter *splitter = new QSplitter();
     splitter->setChildrenCollapsible(false);
-    splitter->addWidget(view);
+    splitter->addWidget(viewLayoutBox);
     splitter->addWidget(textInputBox);
     splitter->addWidget(textInput2Box);
     splitter->setStretchFactor(0,2);
@@ -134,32 +191,32 @@ Visualize2D::Visualize2D(QWidget *parent)
     lineEditx2->toGroupBox("100", "x <");
     lineEdity1->toGroupBox("0", "y >=");
     lineEdity2->toGroupBox("100", "y <");
+    lineEditz1->toGroupBox("0", "z >=");
+    lineEditz2->toGroupBox("100", "z <");
 
     QHBoxLayout *domainLayout = new QHBoxLayout();
     domainLayout->addWidget(lineEditx1->groupBox);
     domainLayout->addWidget(lineEditx2->groupBox);
     domainLayout->addWidget(lineEdity1->groupBox);
     domainLayout->addWidget(lineEdity2->groupBox);
+    domainLayout->addWidget(lineEditz1->groupBox);
+    domainLayout->addWidget(lineEditz2->groupBox);
     domainLayout->setSpacing(10);
 
 
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(splitter, 1, 0);
     layout->addLayout(domainLayout,2,0);
-    layout->addWidget(button,3,0, Qt::AlignHCenter);
+    layout->addWidget(button, 3,0, Qt::AlignHCenter);
     setLayout(layout);
 
-
-    setWindowTitle(tr("recursively enumerable visualizer 2D"));
 }
 
-
-
-void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom)
+void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, int z, QGraphicsScene *scene)
 {
     scene->clear();
     scene->setSceneRect(0, 0, ( dom[1]-dom[0]) *10, ( dom[3]-dom[2]) *10);
-    valueArray2D valarr = valueArray2D(sf, sf2, dom);
+    valueArray3D valarr = valueArray3D(sf, sf2);
     QJSEngine engine;
     QJSValueList lst;
 
@@ -167,8 +224,8 @@ void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom)
     for (int i = dom[0]*10; i < dom[1]*10; i += 10) {
         int yy = dom[2];
         for (int j = dom[2]*10; j < dom[3]*10; j += 10) {
-            QColor color(valarr.getColor(valarr.getValue(xx,yy)));
-            DrawPixel *item = new DrawPixel(color, xx, yy, valarr.getValue(xx,yy));
+            QColor color(valarr.getColor(valarr.getValue(xx,yy,z)));
+            DrawPixel *item = new DrawPixel(color, xx, yy, z, valarr.getValue(xx,yy,z));
             item->setPos(QPointF(i, j));
             scene->addItem(item);
             yy++;
@@ -177,4 +234,28 @@ void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom)
     }
 
 
+
+}
+
+
+std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
+    int z1 = dom[4];
+    int z2 = dom[5];
+    std::vector<QGraphicsScene *> scenes;
+    for (int i = z1 ; i < z2 ; i++) {
+        QGraphicsScene *scene = new QGraphicsScene(this);
+        Visualize3D::populateScene(sf, sf2, {dom.begin(), dom.end() -2}, i, scene);
+        scenes.push_back(scene);
+    }
+
+    timeSlider->setMinimum(z1);
+    timeSlider->setMaximum(z2-1);
+    timeSlider->setValue(z1);
+    timeSlider->setTickPosition(QSlider::TicksBelow);
+    connect(timeSlider, &QAbstractSlider::valueChanged, this, [this, scenes]() {
+            this->view->graphicsView->setScene(scenes[timeSlider->value()]);
+    });
+    this->view->graphicsView->setScene(scenes[timeSlider->value()]);
+
+    return scenes;
 }

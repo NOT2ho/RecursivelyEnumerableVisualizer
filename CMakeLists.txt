@@ -32,6 +32,8 @@ qt_add_qml_module(appinfinitelyLazy
         SOURCES valuearray3d.cpp
         SOURCES visualize3D.h
         SOURCES visualize3d.cpp
+        SOURCES
+        SOURCES savablewidget.h savablewidget.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

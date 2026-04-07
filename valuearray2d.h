@@ -17,7 +17,7 @@ public:
     QString s;
     QString cs;
     std::vector<int> dom;
-    std::vector<std::vector<int>> valArr;
+    //std::vector<std::vector<int>> valArr;
     valueArray2D(QString sf, QString sf2, std::vector<int> dom);
     int getValue(int, int);
     QColor getColor(int);

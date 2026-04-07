@@ -11,7 +11,7 @@ QJSValue valueArray3D::parse (QString strf) {
     return engine.evaluate("({" + strf + "})").property("main");
 }
 
-valueArray3D::valueArray3D (QString s, QString s2, std::vector<int> dom) {
+valueArray3D::valueArray3D (QString s, QString s2) {
     f = parse2(s);
     cf = parse(s2);
 }

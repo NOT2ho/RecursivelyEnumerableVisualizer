@@ -14,15 +14,15 @@ QJSValue valueArray2D::parse (QString strf) {
 valueArray2D::valueArray2D (QString s, QString s2, std::vector<int> dom) {
     f = parse2(s);
     cf = parse(s2);
-    for (int i = dom[0]; i < dom[1]; i++){
-        std::vector<int> a;
-        for (int j = dom[2]; j < dom[3] ; j++){
-            QJSValueList lst;
-            lst << i << j;
-            a.emplace_back(f.call(lst).toInt());
-        }
-        valArr.emplace_back(a);
-    }
+    // for (int i = dom[0]; i < dom[1]; i++){
+    //     std::vector<int> a;
+    //     for (int j = dom[2]; j < dom[3] ; j++){
+    //         QJSValueList lst;
+    //         lst << i << j;
+    //         a.emplace_back(f.call(lst).toInt());
+    //     }
+    //     valArr->emplace_back(a);
+    // }
 }
 
 

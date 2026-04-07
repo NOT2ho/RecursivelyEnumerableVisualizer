@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QVarLengthArray>
+#include <sstream>
 
 DrawPixel::DrawPixel(const QColor &color, int x, int y, int val)
     : QGraphicsItem(), RECT (QRectF(0, 0, 10, 10))
@@ -12,10 +13,22 @@ DrawPixel::DrawPixel(const QColor &color, int x, int y, int val)
     this->y = y;
     this->color = color;
     this->val = val;
-    setZValue((x + y) % 2);;
 
     setAcceptHoverEvents(true);
 }
+
+DrawPixel::DrawPixel(const QColor &color, int x, int y, int z, int val)
+    : QGraphicsItem(), RECT (QRectF(0, 0, 10, 10))
+{
+    this->x = x;
+    this->y = y;
+    this->z = new int(z);
+    this->color = color;
+    this->val = val;
+
+    setAcceptHoverEvents(true);
+}
+
 
 QRectF DrawPixel::boundingRect() const {
     return RECT;
@@ -32,15 +45,18 @@ void DrawPixel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
 
     if (color.lightness() < 200) textColor = QColor(QColorConstants::White);
-    // Draw text
     if (lod >= 2.5) {
-        QFont font("Ubuntu Mono", 1);
+        QFont font("Malgun Gothic", 1);
         font.setStyleStrategy(QFont::ForceOutline);
         painter->setPen(textColor);
         painter->setFont(font);
         painter->save();
         painter->scale(1, 1);
-        painter->drawText(RECT, Qt::AlignCenter, QString("〈%1, %2〉 ↦ %3").arg(x).arg(y).arg(val));
+        std::stringstream ss;
+        if (z == nullptr)
+            ss << "〈" << x << ", " << y << "〉 ↦ " << val;
+        else ss << "〈" << x << ", " << y << ", " << *z << "〉 ↦ " << val;
+        painter->drawText(RECT, Qt::AlignCenter, QString::fromStdString(ss.str()));
         painter->restore();
     }
 }

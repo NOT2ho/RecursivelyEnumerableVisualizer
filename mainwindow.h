@@ -9,7 +9,13 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
+private:
+    void seeHelp();
+    void seeSeemore();
+    void saveasimage(QWidget *widget);
+    void showMsgBox(QString title, QString text);
 signals:
+
 };
 
 #endif // MAINWINDOW_H

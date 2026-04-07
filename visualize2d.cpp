@@ -1,6 +1,7 @@
 #include "linetextframe.h"
 #include "drawpixel.h"
 #include "visualize2d.h"
+#include "savablewidget.h"
 #include "view.h"
 #include "valuearray2d.h"
 #include <QHBoxLayout>
@@ -12,9 +13,11 @@
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include<QMenuBar>
+#include<qfiledialog.h>
+#include <QtLogging>
 
-Visualize2D::Visualize2D(QWidget *parent)
-    : QWidget(parent), scene(new QGraphicsScene(this)), MAX_DOMAIN_RANGE (500)
+Visualize2D::Visualize2D(QWidget *parent, int dimension)
+    : SavableWidget(parent), image(new QImage()), scene(new QGraphicsScene(this)),  MAX_DOMAIN_RANGE (500)
 
 {
 
@@ -92,9 +95,11 @@ Visualize2D::Visualize2D(QWidget *parent)
             populateScene (
             textInput->toPlainText(),
             textInput2->toPlainText(),
-            { x1, x2, y1, y2 });
+            { x1, x2, y1, y2 }, this->scene);
+            savable = true;
             }
         else {
+            savable = false;
                 QMessageBox msgBox(this);
                 msgBox.setText(tr("범위는 %1보다 작은 자연수여야 합니다. 자연수는 0부터 시작합니다. 너무 큰 수를 넣으면 어떻게 될지는 모릅니다.").arg(MAX_DOMAIN_RANGE));
                 msgBox.exec();
@@ -102,7 +107,6 @@ Visualize2D::Visualize2D(QWidget *parent)
     });
 
     button->setFixedSize(QSize(100, 30));
-
 
     QVBoxLayout *textInputlayout = new QVBoxLayout();
     textInputlayout->addWidget(textInputLabel, 0);
@@ -153,28 +157,44 @@ Visualize2D::Visualize2D(QWidget *parent)
     setWindowTitle(tr("recursively enumerable visualizer 2D"));
 }
 
+bool Visualize2D::saveImage () {
+    if (savable) {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                    "\\",
+                                                    tr("Images (*.bmp, *.png, *.jpg)"));
+    return image->save(fileName, 0, 100);
+    }
+    else {
+    QMessageBox msgBox(this);
+    msgBox.setText(tr("?"));
+    msgBox.exec();
+    return false;
+    }
+}
 
-
-void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom)
+void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom, QGraphicsScene *scene)
 {
     scene->clear();
-    scene->setSceneRect(0, 0, ( dom[1]-dom[0]) *10, ( dom[3]-dom[2]) *10);
+    width = dom[1]-dom[0];
+    height = dom[3]-dom[2];
+    scene->setSceneRect(0, 0, width *10, height *10);
     valueArray2D valarr = valueArray2D(sf, sf2, dom);
     QJSEngine engine;
     QJSValueList lst;
-
+    image = new QImage(width, height, QImage::Format::Format_ARGB32);
+    image->fill(0x00000000);
     int xx = dom[0];
     for (int i = dom[0]*10; i < dom[1]*10; i += 10) {
         int yy = dom[2];
         for (int j = dom[2]*10; j < dom[3]*10; j += 10) {
-            QColor color(valarr.getColor(valarr.getValue(xx,yy)));
-            DrawPixel *item = new DrawPixel(color, xx, yy, valarr.getValue(xx,yy));
+            auto val = valarr.getValue(xx,yy);
+            QColor color(valarr.getColor(val));
+            DrawPixel *item = new DrawPixel(color, xx, yy, val);
             item->setPos(QPointF(i, j));
             scene->addItem(item);
+            image->setPixelColor(QPoint(xx - dom[0], yy - dom[2]), color);
             yy++;
         }
         xx++;
     }
-
-
 }
