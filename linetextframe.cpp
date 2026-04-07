@@ -16,7 +16,7 @@ void LineTextFrame::toGroupBox(QString defval, QString name) {
     lineEdit->setText(defval);
     label->setText(name);
     lineEdit->setFixedSize(QSize(100, 30));
-    lineEdit->setStyleSheet( "background: #F5F5F5");
+    lineEdit->setStyleSheet( "background: #F5F5F5; border-radius: 5px;");
     lineTextLayout->addWidget(label, 0, Qt::AlignCenter);
     lineTextLayout->addWidget(lineEdit, 0, Qt::AlignCenter);
     groupBox->setLayout(lineTextLayout);

@@ -84,11 +84,10 @@ void MainWindow::saveasimage() {
     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
     if (active->savable) {
         auto isSaved = active->saveImage();
-        if (!isSaved)
-        {
-            showMsgBox("실패", "저장 실패");
-        }
+        if (!isSaved) showMsgBox("실패", "저장 실패");
+        else showMsgBox("성공", "저장 성공");
     }
+    else showMsgBox("실패", "무엇을 저장?");
 }
 
 void MainWindow::saveasimagesequence() {
@@ -97,9 +96,9 @@ void MainWindow::saveasimagesequence() {
    // else
         if (active->savable) {
         auto isSaved = active->saveImages();
-        if (!isSaved)
-        {
-            showMsgBox("실패", "저장 실패");
-        }
+        if (!isSaved) showMsgBox("실패", "저장 실패");
+        else showMsgBox("성공", "저장 성공");
+
     }
+        else showMsgBox("실패", "무엇을 저장?");
 }

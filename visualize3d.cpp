@@ -98,12 +98,13 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
         auto isInRange = [this](int x) { return x >= 0 && x < MAX_DOMAIN_RANGE; };
         if (x1 >= 0 && y1 >= 0 && z1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && isInRange(z2 - z1) && allOk) {
             imageSequence= {};
-            this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ t < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
             makeFrames(
             textInput->toPlainText(),
             textInput2->toPlainText(),
             { x1, x2, y1, y2, z1, z2});
             setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            currentImage = imageSequence[timeSlider->minimum()];
             savable = true;
         }
         else {
