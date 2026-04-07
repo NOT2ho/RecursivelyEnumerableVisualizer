@@ -25,6 +25,7 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
 
 {
 
+    imageSequence= {};
 
     visualize3d = new QWidget(view);
     QFont font ("Ubuntu Mono");
@@ -96,6 +97,7 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
         bool allOk = std::all_of(ok.begin(), ok.end(), [](bool *x){return *x;});
         auto isInRange = [this](int x) { return x >= 0 && x < MAX_DOMAIN_RANGE; };
         if (x1 >= 0 && y1 >= 0 && z1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && isInRange(z2 - z1) && allOk) {
+            imageSequence= {};
             this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
             makeFrames(
             textInput->toPlainText(),
@@ -254,11 +256,11 @@ void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, i
             item->setPos(QPointF(i, j));
             scene->addItem(item);
             image->setPixelColor(QPoint(xx - dom[0], yy - dom[2]), color);
-            imageSequence.push_back(image);
             yy++;
         }
         xx++;
     }
+    imageSequence.push_back(new QImage(*image));
 }
 
 
@@ -268,10 +270,11 @@ void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, i
 std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
     int z1 = dom[4];
     int z2 = dom[5];
+    std::vector<int> subdom = {dom.begin(), dom.end() -2};
     std::vector<QGraphicsScene *> scenes;
     for (int i = z1 ; i < z2 ; i++) {
         QGraphicsScene *scene = new QGraphicsScene(this);
-        Visualize3D::populateScene(sf, sf2, {dom.begin(), dom.end() -2}, i, scene);
+        Visualize3D::populateScene(sf, sf2, subdom, i, scene);
         scenes.push_back(scene);
     }
 
@@ -280,10 +283,10 @@ std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, s
     timeSlider->setValue(z1);
     timeSlider->setTickPosition(QSlider::TicksBelow);
     connect(timeSlider, &QAbstractSlider::valueChanged, this, [this, scenes]() {
-            this->view->graphicsView->setScene(scenes[timeSlider->value()]);
-            this->currentImage = imageSequence[timeSlider->value()];
+            this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
+            this->currentImage = imageSequence[timeSlider->value() - timeSlider->minimum()];
     });
-    this->view->graphicsView->setScene(scenes[timeSlider->value()]);
+    this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
 
     return scenes;
 }
