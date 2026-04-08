@@ -17,7 +17,7 @@ class Visualize3D : public SavableWidget
 {
     Q_OBJECT
 public:
-    Visualize3D(QWidget *parent = nullptr, int dimension = 3, int xstart = 0, int xend = 100, int ystart = 0, int yend = 100, int tstart = 0, int tend = 30, QByteArray pixel_function = "main: (x, y) => { \n\tfunction calc(x, y) { \n\t\treturn x + y \n\t} \n return calc(x, y) \n}", QByteArray color_function = "main: (i) => {\n\tfunction color(i) {\n\t\tlet c = i % 256\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}");
+    Visualize3D(QWidget *parent = nullptr, int dimension = 3, int xstart = 0, int xend = 100, int ystart = 0, int yend = 100, int tstart = 0, int tend = 30, QByteArray pixel_function = "main: (x, y) => { \n\tfunction calc(x, y, z) { \n\t\treturn x + y + z\n\t} \n return calc(x, y, z) \n}", QByteArray color_function = "main: (i) => {\n\tfunction color(i) {\n\t\tlet c = i % 256\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}");
     bool saveImage () override;
     bool saveImages () override;
     bool saveProject () override;
