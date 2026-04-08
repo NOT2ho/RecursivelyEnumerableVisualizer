@@ -16,6 +16,7 @@ public:
     virtual bool saveImages() ;
     virtual bool saveProject() ;
 
+
 signals:
 };
 

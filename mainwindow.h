@@ -17,6 +17,7 @@ private:
     void showMsgBox(QString title, QString text);
     void saveasimagesequence() ;
     void saveproject() ;
+    void openProject();
     QTabWidget *tabWidget;
 signals:
 

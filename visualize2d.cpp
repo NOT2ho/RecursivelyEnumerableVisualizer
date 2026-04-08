@@ -18,11 +18,16 @@
 #include<qfiledialog.h>
 #include <QtLogging>
 
-Visualize2D::Visualize2D(QWidget *parent, int dimension)
+Visualize2D::Visualize2D(QWidget *parent, int dimension, int xstart, int xend, int ystart, int yend, QByteArray pixel_function, QByteArray color_function)
     : SavableWidget(parent), image(new QImage()), scene(new QGraphicsScene(this)),  MAX_DOMAIN_RANGE (500)
 
 {
-
+    this->xstart = xstart;
+    this->xend = xend;
+    this->ystart = ystart;
+    this->yend = yend;
+    this->pixel_function = pixel_function;
+    this->color_function = color_function;
 
     View *view = new View();
     view->graphicsView->setScene(scene);
@@ -76,9 +81,14 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension)
     LineTextFrame *lineEdity1 = new LineTextFrame(this);
     LineTextFrame *lineEdity2 = new LineTextFrame(this);
 
-    textInput->setPlainText("main: (x, y) => { \n\tfunction calc(x, y) { \n\t\treturn x + y \n\t} \n return calc(x, y) \n}");
-    textInput2->setPlainText("main: (i) => {\n\tfunction color(i) {\n\t\tlet c = i % 256\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}");
+    textInput->setPlainText(this->pixel_function);
+    textInput2->setPlainText(this->color_function);
 
+    view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4").arg(this->xstart).arg(this->xend).arg(this->ystart).arg(this->yend));
+        populateScene (
+            textInput->toPlainText(),
+            textInput2->toPlainText(),
+        { this->xstart, this->xend, this->ystart , this->yend}, this->scene);
 
 
     QPushButton *button = new QPushButton("&Enter", this);
@@ -93,12 +103,12 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension)
         int y2 = lineEdity2->lineEdit->text().toInt(ok4);
         auto isInRange = [this](int x) { return x >= 0 && x < MAX_DOMAIN_RANGE; };
         if (x1 >= 0 && y1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && *ok && *ok2 && *ok3 && *ok4) {
-            xstart = x1;
-            xend = x2;
-            ystart = y1;
-            yend = y2;
-            pixel_function = textInput->toPlainText().toUtf8();
-            color_function = textInput2->toPlainText().toUtf8();
+            this->xstart = x1;
+            this->xend = x2;
+            this->ystart = y1;
+            this->yend = y2;
+            this->pixel_function = textInput->toPlainText().toUtf8();
+            this->color_function = textInput2->toPlainText().toUtf8();
             view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4").arg(x1).arg(x2).arg(y1).arg(y2));
             populateScene (
             textInput->toPlainText(),
@@ -142,10 +152,10 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension)
     splitter->setStretchFactor(1,1);
     splitter->setStretchFactor(2,1);
 
-    lineEditx1->toGroupBox("0", "x >=");
-    lineEditx2->toGroupBox("100", "x <");
-    lineEdity1->toGroupBox("0", "y >=");
-    lineEdity2->toGroupBox("100", "y <");
+    lineEditx1->toGroupBox(QString::number(this->xstart), "x >=");
+    lineEditx2->toGroupBox(QString::number(this->xend), "x <");
+    lineEdity1->toGroupBox(QString::number(this->ystart), "y >=");
+    lineEdity2->toGroupBox(QString::number(this->yend), "y <");
 
     QHBoxLayout *domainLayout = new QHBoxLayout();
     domainLayout->addWidget(lineEditx1->groupBox);
@@ -167,9 +177,11 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension)
 
 bool Visualize2D::saveImage () {
     if (savable) {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+        QFileDialog *dialog = new QFileDialog();
+        dialog->setDefaultSuffix("png");
+        QString fileName = dialog->getSaveFileName(this, tr("Save File"),
                                                     "\\",
-                                                    tr("Images (*.bmp, *.png, *.jpg)"));
+                                                    tr("Image Files (*.png *.jpg *.bmp)"));
     return image->save(fileName, 0, 100);
     }
     else {
@@ -178,7 +190,6 @@ bool Visualize2D::saveImage () {
     msgBox.exec();
     return false;
     }
-
 
 }
 

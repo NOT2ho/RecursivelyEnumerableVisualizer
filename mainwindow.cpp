@@ -1,10 +1,14 @@
 #include "mainwindow.h"
 #include "visualize2D.h"
 #include "visualize3D.h"
+#include <qdir.h>
 #include <qdockwidget.h>
+#include <qjsondocument.h>
+#include <qjsonobject.h>
 #include <qtabwidget.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow{parent}
@@ -18,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu *fileMenu = new QMenu("file", this);
     QMenu *helpMenu = new QMenu("help", this);
     QAction *saveasimageAct = new QAction("save image", this);
-
+    QAction *loadprojectAct = new QAction("load project", this);
     QAction *saveasimagesequenceAct = new QAction("save image sequence", this);
 
     QAction *saveprojectAct = new QAction("save project", this);
@@ -35,7 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     fileMenu->addAction(saveasimagesequenceAct);
     fileMenu->addAction(saveprojectAct);
-
+    fileMenu->addSeparator();
+    fileMenu->addAction(loadprojectAct);
     helpMenu->addAction(helpAct);
     helpMenu->addAction(seemoreAct);
     windowMenu->addAction(add2dtabAct);
@@ -56,19 +61,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     connect(add2dtabAct, &QAction::triggered, this, [this](){
-            this->tabWidget->addTab(new Visualize2D(this), tr("2d vis"));});
+        int count =    tabWidget->count();
+            this->tabWidget->addTab(new Visualize2D(this), tr("2d vis"));
+            tabWidget->setCurrentWidget(tabWidget->widget(count));});
     connect(add3dtabAct, &QAction::triggered, this, [this](){
-        this->tabWidget->addTab(new Visualize3D(this), tr("3d vis"));});
+        int count =    tabWidget->count();
+        this->tabWidget->addTab(new Visualize3D(this), tr("3d vis"));
+        tabWidget->setCurrentWidget(tabWidget->widget(count));
+    });
 
 
     connect(saveasimageAct, &QAction::triggered, this, [this](){saveasimage();});
-
-
     connect(saveasimagesequenceAct, &QAction::triggered, this, [this](){saveasimagesequence();});
-
     connect(saveprojectAct, &QAction::triggered, this, [this](){saveproject();});
-
-
+    connect(loadprojectAct, &QAction::triggered, this, [this](){openProject();});
 }
 
 void MainWindow::seeHelp() {
@@ -84,6 +90,52 @@ void MainWindow::showMsgBox(QString title, QString text) {
     msgBox.setWindowTitle(title);
     msgBox.setText(text);
     msgBox.exec();
+}
+
+void MainWindow::openProject () {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                    "\\",
+                                                    tr("JSON (*.json)")
+                                                    );
+    auto name = QFileInfo(fileName).baseName();
+    QFile loadFile(fileName);
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file.");
+        showMsgBox("실패", "당신 잘못"); }
+
+    else {
+        int count =    tabWidget->count();
+    QByteArray saveData = loadFile.readAll();
+    QJsonObject obj = QJsonDocument::fromJson(saveData).object();
+    if (obj.value("dimension") == 2) {
+        QJsonObject functions = obj.value("functions").toObject();
+        QByteArray pixel_function =functions.value("pixel-function").toString().toUtf8();
+        QByteArray color_function =functions.value("color-function").toString().toUtf8();
+        QJsonObject domains = obj.value("domains").toObject();
+        int x1 = domains.value("x1").toInt();
+        int x2 = domains.value("x2").toInt();
+        int y1 = domains.value("y1").toInt();
+        int y2 = domains.value("y2").toInt();
+        this->tabWidget->addTab(new Visualize2D(this, 2, x1, x2, y1, y2, pixel_function, color_function), name);
+        tabWidget->setCurrentWidget(tabWidget->widget(count));
+    }
+    else if (obj.value("dimension") == 3) {
+        QJsonObject functions = obj.value("functions").toObject();
+        QByteArray pixel_function =functions.value("pixel-function").toString().toUtf8();
+        QByteArray color_function =functions.value("color-function").toString().toUtf8();
+        QJsonObject domains = obj.value("domains").toObject();
+        int x1 = domains.value("x1").toInt();
+        int x2 = domains.value("x2").toInt();
+        int y1 = domains.value("y1").toInt();
+        int y2 = domains.value("y2").toInt();
+        int t1 = domains.value("t1").toInt();
+        int t2 = domains.value("t2").toInt();
+        this->tabWidget->addTab(new Visualize3D(this, 3, x1, x2, y1, y2, t1, t2, pixel_function, color_function), name);
+        tabWidget->setCurrentWidget(tabWidget->widget(count));
+    }
+    }
+
+
 }
 
 void MainWindow::saveasimage() {
@@ -109,8 +161,6 @@ void MainWindow::saveproject() {
 
 void MainWindow::saveasimagesequence() {
     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
-    //if (active->DIM != 3) showMsgBox("실패", "ㅠㅜㅠ");
-   // else
         if (active->savable) {
         auto isSaved = active->saveImages();
         if (!isSaved) showMsgBox("실패", "저장 실패(직접 저장을 취소했거나 잘못된 확장자를 입력)");

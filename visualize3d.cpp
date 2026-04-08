@@ -22,10 +22,18 @@
 #include<qfiledialog.h>
 #include <qtoolbutton.h>
 
-Visualize3D::Visualize3D(QWidget *parent, int dimension)
+Visualize3D::Visualize3D(QWidget *parent, int dimension, int xstart, int xend, int ystart, int yend, int tstart, int tend, QByteArray pixel_function, QByteArray color_function)
     : SavableWidget(parent), tLabel(new QLabel(this)), timeSlider(new QSlider(Qt::Orientation::Horizontal, this)), view(new View()), MAX_DOMAIN_RANGE (500)
 
 {
+    this->xstart = xstart;
+    this->xend = xend;
+    this->ystart = ystart;
+    this->yend = yend;
+    this->tstart = tstart;
+    this->tend = tend;
+    this->pixel_function = pixel_function;
+    this->color_function = color_function;
 
     imageSequence= {};
 
@@ -82,9 +90,9 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
     LineTextFrame *lineEditz1 = new LineTextFrame(this);
     LineTextFrame *lineEditz2 = new LineTextFrame(this);
 
-    textInput->setPlainText("main: (x, y, z) => { \n\tfunction calc(x, y, z) { \n\t\treturn x + y + z\n\t} \n return calc(x, y, z) \n}");
-    textInput2->setPlainText("main: (i) => {\n\tfunction color(i) {\n\t\tlet c = i % 256\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}");
 
+    textInput->setPlainText(this->pixel_function);
+    textInput2->setPlainText(this->color_function);
 
 
     QPushButton *button = new QPushButton("&Enter", this);
@@ -101,14 +109,14 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
         if (x1 >= 0 && y1 >= 0 && z1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && isInRange(z2 - z1) && allOk) {
             imageSequence= {};
             this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ t < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
-            xstart = x1;
-            xend = x2;
-            ystart = y1;
-            yend = y2;
-            tstart = z1;
-            tend = z2;
-            pixel_function = textInput->toPlainText().toUtf8();
-            color_function = textInput2->toPlainText().toUtf8();
+            this->xstart = x1;
+            this->xend = x2;
+            this->ystart = y1;
+            this->yend = y2;
+            this->tstart = z1;
+            this->tend = z2;
+            this->pixel_function = textInput->toPlainText().toUtf8();
+            this->color_function = textInput2->toPlainText().toUtf8();
             makeFrames(
             textInput->toPlainText(),
             textInput2->toPlainText(),
@@ -164,10 +172,8 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
                 timer->start();
                 connect(timer, &QTimer::timeout, timer, [this, min, max, timer](){
                     auto val = timeSlider->value();
-                    if (val < max) { timeSlider->setValue(val+1);
-                        //timer->start();
-                        qInfo() << val;
-                        }
+                    if (val < max) timeSlider->setValue(val+1);
+
                     else {  timeSlider->setValue(min);
                             timer->stop();
                         }
@@ -232,12 +238,12 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
     splitter->setStretchFactor(1,1);
     splitter->setStretchFactor(2,1);
 
-    lineEditx1->toGroupBox("0", "x >=");
-    lineEditx2->toGroupBox("100", "x <");
-    lineEdity1->toGroupBox("0", "y >=");
-    lineEdity2->toGroupBox("100", "y <");
-    lineEditz1->toGroupBox("0", "z >=");
-    lineEditz2->toGroupBox("100", "z <");
+    lineEditx1->toGroupBox(QString::number(this->xstart), "x >=");
+    lineEditx2->toGroupBox(QString::number(this->xend), "x <");
+    lineEdity1->toGroupBox(QString::number(this->ystart), "y >=");
+    lineEdity2->toGroupBox(QString::number(this->yend), "y <");
+    lineEditz1->toGroupBox(QString::number(this->tstart), "z >=");
+    lineEditz2->toGroupBox(QString::number(this->tend), "z <");
 
     QHBoxLayout *domainLayout = new QHBoxLayout();
     domainLayout->addWidget(lineEditx1->groupBox);
@@ -273,9 +279,11 @@ void Visualize3D::zminus()
 
 bool Visualize3D::saveImage () {
     if (savable) {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                        "\\",
-                                                        tr("Images (*.bmp, *.png, *.jpg)"));
+        QFileDialog *dialog = new QFileDialog();
+        dialog->setDefaultSuffix("png");
+        QString fileName = dialog->getSaveFileName(this, tr("Save File"),
+                                                   "\\",
+                                                   tr("Image Files (*.png *.jpg *.bmp)"));
         return currentImage->save(fileName, 0, 100);
     }
     else {
@@ -343,9 +351,11 @@ bool Visualize3D::saveProject () {
 bool Visualize3D::saveImages () {
 
     if (savable) {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                        "\\",
-                                                        tr("Images (*.bmp, *.png, *.jpg)"));
+        QFileDialog *dialog = new QFileDialog();
+        dialog->setDefaultSuffix("png");
+        QString fileName = dialog->getSaveFileName(this, tr("Save File"),
+                                                   "\\",
+                                                   tr("Image Files (*.png *.jpg *.bmp)"));
 
         QString basename = QFileInfo(fileName).baseName();
         QString extension = QFileInfo(fileName).suffix();
