@@ -12,3 +12,6 @@ bool SavableWidget::saveImages() {
     return false;
 }
 
+bool SavableWidget::saveProject() {
+    return false;
+};

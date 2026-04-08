@@ -20,6 +20,7 @@ public:
     Visualize3D(QWidget *parent = nullptr, int dimension = 3);
     bool saveImage () override;
     bool saveImages () override;
+    bool saveProject () override;
 
 private:
     std::vector<QGraphicsScene *> makeFrames(QString sf, QString sf2, std::vector<int> dom);
@@ -35,6 +36,15 @@ private:
     QLabel *tLabel;
     void zplus();
     void zminus();
+    int xstart;
+    int ystart;
+    int tstart;
+    int xend;
+    int yend;
+    int tend;
+    QByteArray pixel_function;
+    QByteArray color_function;
+
 };
 
 #endif // VISUALIZE3D_H

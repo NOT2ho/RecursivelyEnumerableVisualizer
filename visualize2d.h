@@ -4,6 +4,7 @@
 #include "savablewidget.h"
 #include <QWidget>
 #include <QPushButton>
+#include<QByteArray>
 
 QT_BEGIN_NAMESPACE
 class QGraphicsScene;
@@ -20,9 +21,16 @@ public:
 private:
 
     const int MAX_DOMAIN_RANGE;
+    QByteArray pixel_function;
+    QByteArray color_function;
+    int xstart;
+    int xend;
+    int ystart;
+    int yend;
     int width;
     int height;
     QImage *image;
+    bool saveProject () override;
 
     QGraphicsScene *scene;
 };

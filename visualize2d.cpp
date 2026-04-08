@@ -10,6 +10,8 @@
 #include <QJSEngine>
 #include <QLineEdit>
 #include <qgroupbox.h>
+#include <qjsonarray.h>
+#include <qjsonobject.h>
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include<QMenuBar>
@@ -91,6 +93,12 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension)
         int y2 = lineEdity2->lineEdit->text().toInt(ok4);
         auto isInRange = [this](int x) { return x >= 0 && x < MAX_DOMAIN_RANGE; };
         if (x1 >= 0 && y1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && *ok && *ok2 && *ok3 && *ok4) {
+            xstart = x1;
+            xend = x2;
+            ystart = y1;
+            yend = y2;
+            pixel_function = textInput->toPlainText().toUtf8();
+            color_function = textInput2->toPlainText().toUtf8();
             view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4").arg(x1).arg(x2).arg(y1).arg(y2));
             populateScene (
             textInput->toPlainText(),
@@ -170,7 +178,57 @@ bool Visualize2D::saveImage () {
     msgBox.exec();
     return false;
     }
+
+
 }
+
+bool Visualize2D::saveProject () {
+
+    QJsonObject functionObject
+        {
+            {"pixel-function", QJsonValue::fromVariant(pixel_function)},
+            {"color-function", QJsonValue::fromVariant(color_function)}
+        };
+
+    QJsonObject domainObject
+        {
+            {"x1", xstart},
+            {"x2", xend},
+            {"y1", ystart},
+            {"y2", yend}
+        };
+
+    QJsonObject object
+        {
+            {"dimension", 2},
+            {"functions", functionObject},
+            {"domains", domainObject}
+        };
+
+
+    if (savable) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "\\",
+                                                        tr("JSON (*.json"));
+
+
+        QFile saveFile(fileName);
+        if (!saveFile.open(QIODevice::WriteOnly)) {        qWarning("Couldn't open save file.");
+            return false; }
+        QByteArray jsonFile = QJsonDocument(object).toJson();
+        saveFile.write(jsonFile);
+        return true;
+
+    }
+    else {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("?"));
+        msgBox.exec();
+        return false;
+    }
+
+}
+
 
 void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom, QGraphicsScene *scene)
 {

@@ -10,6 +10,7 @@
 #include <QJSEngine>
 #include <QLineEdit>
 #include <qgroupbox.h>
+#include <qjsonobject.h>
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include<QMenuBar>
@@ -100,6 +101,14 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
         if (x1 >= 0 && y1 >= 0 && z1 >= 0 && isInRange(x2 - x1) && isInRange(y2 - y1) && isInRange(z2 - z1) && allOk) {
             imageSequence= {};
             this->view->changeName(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ t < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            xstart = x1;
+            xend = x2;
+            ystart = y1;
+            yend = y2;
+            tstart = z1;
+            tend = z2;
+            pixel_function = textInput->toPlainText().toUtf8();
+            color_function = textInput2->toPlainText().toUtf8();
             makeFrames(
             textInput->toPlainText(),
             textInput2->toPlainText(),
@@ -275,6 +284,56 @@ bool Visualize3D::saveImage () {
         msgBox.exec();
         return false;
     }
+}
+
+
+bool Visualize3D::saveProject () {
+
+    QJsonObject functionObject
+        {
+            {"pixel-function", QJsonValue::fromVariant(pixel_function)},
+            {"color-function", QJsonValue::fromVariant(color_function)}
+        };
+
+    QJsonObject domainObject
+        {
+            {"x1", xstart},
+            {"x2", xend},
+            {"y1", ystart},
+            {"y2", yend},
+            {"t1", tstart},
+            {"t2", tend}
+        };
+
+    QJsonObject object
+        {
+            {"dimension", 3},
+            {"functions", functionObject},
+            {"domains", domainObject}
+        };
+
+
+    if (savable) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "\\",
+                                                        tr("JSON (*.json"));
+
+
+        QFile saveFile(fileName);
+        if (!saveFile.open(QIODevice::WriteOnly)) {        qWarning("Couldn't open save file.");
+            return false; }
+        QByteArray jsonFile = QJsonDocument(object).toJson();
+        saveFile.write(jsonFile);
+        return true;
+
+    }
+    else {
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("?"));
+        msgBox.exec();
+        return false;
+    }
+
 }
 
 

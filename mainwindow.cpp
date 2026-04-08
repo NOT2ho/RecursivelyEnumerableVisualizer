@@ -17,9 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu *windowMenu = new QMenu("window", this);
     QMenu *fileMenu = new QMenu("file", this);
     QMenu *helpMenu = new QMenu("help", this);
-    QAction *saveasimageAct = new QAction("save as image", this);
+    QAction *saveasimageAct = new QAction("save image", this);
 
-    QAction *saveasimagesequenceAct = new QAction("save as image sequence", this);
+    QAction *saveasimagesequenceAct = new QAction("save image sequence", this);
+
+    QAction *saveprojectAct = new QAction("save project", this);
     QAction *helpAct = new QAction("help..", this);
     QAction *seemoreAct = new QAction("see more..", this);
 
@@ -32,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addAction(saveasimageAct);
 
     fileMenu->addAction(saveasimagesequenceAct);
+    fileMenu->addAction(saveprojectAct);
+
     helpMenu->addAction(helpAct);
     helpMenu->addAction(seemoreAct);
     windowMenu->addAction(add2dtabAct);
@@ -62,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(saveasimagesequenceAct, &QAction::triggered, this, [this](){saveasimagesequence();});
 
+    connect(saveprojectAct, &QAction::triggered, this, [this](){saveproject();});
+
 
 }
 
@@ -89,6 +95,17 @@ void MainWindow::saveasimage() {
     }
     else showMsgBox("실패", "무엇을 저장?");
 }
+
+void MainWindow::saveproject() {
+    auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
+    if (active->savable) {
+        auto isSaved = active->saveProject();
+        if (!isSaved) showMsgBox("실패", "저장 실패(직접 저장을 취소했거나 잘못된 확장자를 입력 또는 읽기 전용)");
+        else showMsgBox("성공", "저장 성공");
+    }
+    else showMsgBox("실패", "무엇을 저장?");
+}
+
 
 void MainWindow::saveasimagesequence() {
     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
