@@ -22,13 +22,14 @@ public:
     bool saveImages () override;
     bool saveProject () override;
 private:
-    std::vector<QGraphicsScene *> makeFrames(QString sf, QString sf2, std::vector<int> dom);
+    void makeFrames(QString sf, QString sf2, std::vector<int> dom);
     void populateScene(QString sf, QString sf2, std::vector<int> dom, int z, QGraphicsScene *scene);
     const int MAX_DOMAIN_RANGE;
     View *view;
     QWidget *visualize3d;
     QSlider *timeSlider;
     QImage *currentImage;
+    std::vector<QGraphicsScene *> scenes;
     std::vector<QImage *> imageSequence;
     int width;
     int height;

@@ -36,8 +36,9 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension, int xstart, int xend, i
     this->color_function = color_function;
 
     imageSequence= {};
+    makeFrames(this->pixel_function, this->color_function, {this->xstart, this->xend, this->ystart, this->yend, this->tstart, this->tend});
 
-    visualize3d = new QWidget(view);
+
     QFont font ("Ubuntu Mono");
     font.setStyleHint(QFont::Monospace);
 
@@ -411,14 +412,13 @@ void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, i
 
 
 
-std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
+void Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
     int z1 = dom[4];
     int z2 = dom[5];
     std::vector<int> subdom = {dom.begin(), dom.end() -2};
-    std::vector<QGraphicsScene *> scenes;
     for (int i = z1 ; i < z2 ; i++) {
         QGraphicsScene *scene = new QGraphicsScene(this);
-        Visualize3D::populateScene(sf, sf2, subdom, i, scene);
+        populateScene(sf, sf2, subdom, i, scene);
         scenes.push_back(scene);
     }
 
@@ -426,12 +426,10 @@ std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, s
     timeSlider->setMaximum(z2-1);
     timeSlider->setValue(z1);
     timeSlider->setTickPosition(QSlider::TicksBelow);
-    connect(timeSlider, &QAbstractSlider::valueChanged, this, [this, scenes]() {
+    connect(timeSlider, &QAbstractSlider::valueChanged, this, [this]() {
             this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
             this->currentImage = imageSequence[timeSlider->value() - timeSlider->minimum()];
             this->tLabel->setText(tr("t= %1").arg(timeSlider->value()));
     });
     this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
-
-    return scenes;
 }
