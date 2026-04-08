@@ -70,7 +70,7 @@ void MainWindow::seeHelp() {
 }
 
 void MainWindow::seeSeemore() {
-    showMsgBox(tr("설명"), "버전: 테스트\n현재는 2차원, 3차원만 있습니다(4차원 이상을 시각화하는(슬라이더를 더 추가해서 2차원 단면을 잔뜩 만드는 것보다 더 좋은) 방법이 있으면 당신이 직접 만드십시오). r.e.set을 도메인으로 정하지 않으면 영원히 값이 안 나오는 것이 설계 의도이며 실제로 그렇게 되는지는 모릅니다(아마 그렇게 될 듯). 더 상세한 도메인을 입력받는 건 아직 안 만들었으니 입력에 주의하세요." );
+    showMsgBox(tr("설명"), "버전: 테스트 v0.04081131\n현재는 2차원, 3차원만 있습니다(4차원 이상을 시각화하는(슬라이더를 더 추가해서 2차원 단면을 잔뜩 만드는 것보다 더 좋은) 방법이 있으면 당신이 직접 만드십시오). r.e.set을 도메인으로 정하지 않으면 도메인 아닌 곳에서 멈춰서 영원히 값이 안 나오는 것이 설계 의도이며 실제로 그렇게 되는지는 모릅니다(아마 그렇게 될 듯). 더 상세한 도메인을 입력받는 건 아직 안 만들었으니 입력에 주의하세요." );
 }
 
 void MainWindow::showMsgBox(QString title, QString text) {
@@ -84,7 +84,7 @@ void MainWindow::saveasimage() {
     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
     if (active->savable) {
         auto isSaved = active->saveImage();
-        if (!isSaved) showMsgBox("실패", "저장 실패");
+        if (!isSaved) showMsgBox("실패", "저장 실패(직접 저장을 취소했거나 잘못된 확장자를 입력)");
         else showMsgBox("성공", "저장 성공");
     }
     else showMsgBox("실패", "무엇을 저장?");
@@ -96,7 +96,7 @@ void MainWindow::saveasimagesequence() {
    // else
         if (active->savable) {
         auto isSaved = active->saveImages();
-        if (!isSaved) showMsgBox("실패", "저장 실패");
+        if (!isSaved) showMsgBox("실패", "저장 실패(직접 저장을 취소했거나 잘못된 확장자를 입력)");
         else showMsgBox("성공", "저장 성공");
 
     }

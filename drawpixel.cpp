@@ -47,6 +47,7 @@ void DrawPixel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     if (color.lightness() < 200) textColor = QColor(QColorConstants::White);
     if (lod >= 2.5) {
         QFont font("Malgun Gothic", 1);
+        font.setStyleHint(QFont::Monospace);
         font.setStyleStrategy(QFont::ForceOutline);
         painter->setPen(textColor);
         painter->setFont(font);

@@ -16,12 +16,13 @@
 #include <qslider.h>
 #include <algorithm>
 #include <QtLogging>
+#include <qstyle.h>
 #include <qtimer.h>
 #include<qfiledialog.h>
 #include <qtoolbutton.h>
 
 Visualize3D::Visualize3D(QWidget *parent, int dimension)
-    : SavableWidget(parent), timeSlider(new QSlider(Qt::Orientation::Horizontal, this)), view(new View()), MAX_DOMAIN_RANGE (500)
+    : SavableWidget(parent), tLabel(new QLabel(this)), timeSlider(new QSlider(Qt::Orientation::Horizontal, this)), view(new View()), MAX_DOMAIN_RANGE (500)
 
 {
 
@@ -31,7 +32,7 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
     QFont font ("Ubuntu Mono");
     font.setStyleHint(QFont::Monospace);
 
-
+    tLabel->setText("t= ");
 
     QFont labelFont ("");
     labelFont.setBold(true);
@@ -104,6 +105,7 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
             textInput2->toPlainText(),
             { x1, x2, y1, y2, z1, z2});
             setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            tLabel->setText(tr("t= %1").arg(timeSlider->minimum()));
             currentImage = imageSequence[timeSlider->minimum()];
             savable = true;
         }
@@ -168,11 +170,39 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
              msgBox.exec();
         }
     });
+    int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+    QSize iconSize(size, size);
+
+    QToolButton *tplusIcon = new QToolButton;
+    tplusIcon->setAutoRepeat(true);
+    tplusIcon->setAutoRepeatInterval(1);
+    tplusIcon->setAutoRepeatDelay(300);
+    tplusIcon->setText(tr("+"));
+    tplusIcon->setIconSize(iconSize);
+    QToolButton *tminusIcon = new QToolButton;
+    tminusIcon->setAutoRepeat(true);
+    tminusIcon->setAutoRepeatInterval(1);
+    tminusIcon->setAutoRepeatDelay(300);
+    tminusIcon->setText(tr("-"));
+    tminusIcon->setIconSize(iconSize);
+
+
+    tLabel->setFrameStyle(QFrame::NoFrame | QFrame::NoFrame);
+
+    tLabel->setWordWrap(true);
+    tLabel->setAlignment(Qt::AlignLeft);
 
     QHBoxLayout *timerLayout = new QHBoxLayout(this);
+    timerLayout->addWidget(tLabel);
+    timerLayout->addWidget(tminusIcon);
     timerLayout->addWidget(timeSlider);
+    timerLayout->addWidget(tplusIcon);
     timerLayout->addWidget(lineEditSetTimer->groupBox);
     timerLayout->addWidget(playButton);
+
+
+    connect(tplusIcon, &QAbstractButton::clicked, this, &::Visualize3D::zplus);
+    connect(tminusIcon, &QAbstractButton::clicked, this, &::Visualize3D::zminus);
 
     QGroupBox *timerLayoutBox = new QGroupBox(this);
     timerLayoutBox->setLayout(timerLayout);
@@ -216,7 +246,21 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension)
     layout->addWidget(button, 3,0, Qt::AlignHCenter);
     setLayout(layout);
 
+
+
 }
+
+void Visualize3D::zplus()
+{
+    timeSlider->setValue(timeSlider->value() + 1);
+}
+
+void Visualize3D::zminus()
+{
+    timeSlider->setValue(timeSlider->value() - 1);
+}
+
+
 
 bool Visualize3D::saveImage () {
     if (savable) {
@@ -232,6 +276,8 @@ bool Visualize3D::saveImage () {
         return false;
     }
 }
+
+
 
 
 
@@ -314,6 +360,7 @@ std::vector<QGraphicsScene *> Visualize3D::makeFrames(QString sf, QString sf2, s
     connect(timeSlider, &QAbstractSlider::valueChanged, this, [this, scenes]() {
             this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
             this->currentImage = imageSequence[timeSlider->value() - timeSlider->minimum()];
+            this->tLabel->setText(tr("t= %1").arg(timeSlider->value()));
     });
     this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
 

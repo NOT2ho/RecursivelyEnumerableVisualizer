@@ -5,6 +5,7 @@
 #include "view.h"
 #include <QWidget>
 #include <QPushButton>
+#include <qlabel.h>
 #include <qslider.h>
 
 QT_BEGIN_NAMESPACE
@@ -31,7 +32,9 @@ private:
     std::vector<QImage *> imageSequence;
     int width;
     int height;
-    int tRange;
+    QLabel *tLabel;
+    void zplus();
+    void zminus();
 };
 
 #endif // VISUALIZE3D_H
