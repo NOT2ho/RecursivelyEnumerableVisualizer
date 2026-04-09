@@ -21,6 +21,7 @@ public:
     bool saveImage () override;
     bool saveImages () override;
     bool saveProject () override;
+    QImage *image;
 private:
     void makeFrames(QString sf, QString sf2, std::vector<int> dom);
     void populateScene(QString sf, QString sf2, std::vector<int> dom, int z, QGraphicsScene *scene);
@@ -28,7 +29,6 @@ private:
     View *view;
     QWidget *visualize3d;
     QSlider *timeSlider;
-    QImage *currentImage;
     std::vector<QGraphicsScene *> scenes;
     std::vector<QImage *> imageSequence;
     int width;

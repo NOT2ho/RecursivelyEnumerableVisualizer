@@ -15,7 +15,7 @@ public:
     virtual bool saveImage() ;
     virtual bool saveImages() ;
     virtual bool saveProject() ;
-
+    QImage *image;
 
 signals:
 };

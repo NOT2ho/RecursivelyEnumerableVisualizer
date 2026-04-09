@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "savablewidget.h"
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow
@@ -18,6 +17,9 @@ private:
     void saveasimagesequence() ;
     void saveproject() ;
     void openProject();
+    void seeWhylower();
+
+    QIcon findIcon();
     QTabWidget *tabWidget;
 signals:
 

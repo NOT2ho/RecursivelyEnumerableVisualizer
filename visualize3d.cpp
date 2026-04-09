@@ -122,9 +122,9 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension, int xstart, int xend, i
             textInput->toPlainText(),
             textInput2->toPlainText(),
             { x1, x2, y1, y2, z1, z2});
-            setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ y < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
+            setWindowTitle(tr("%1 ≤ x < %2, %3 ≤ y < %4, %5 ≤ t < %6").arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2));
             tLabel->setText(tr("t= %1").arg(timeSlider->minimum()));
-            currentImage = imageSequence[timeSlider->minimum()];
+            image = imageSequence[timeSlider->minimum()];
             savable = true;
         }
         else {
@@ -285,7 +285,7 @@ bool Visualize3D::saveImage () {
         QString fileName = dialog->getSaveFileName(this, tr("Save File"),
                                                    "\\",
                                                    tr("Image Files (*.png *.jpg *.bmp)"));
-        return currentImage->save(fileName, 0, 100);
+        return image->save(fileName, 0, 100);
     }
     else {
         QMessageBox msgBox(this);
@@ -413,6 +413,7 @@ void Visualize3D::populateScene(QString sf, QString sf2, std::vector<int> dom, i
 
 
 void Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
+    scenes = {};
     int z1 = dom[4];
     int z2 = dom[5];
     std::vector<int> subdom = {dom.begin(), dom.end() -2};
@@ -428,7 +429,7 @@ void Visualize3D::makeFrames(QString sf, QString sf2, std::vector<int> dom) {
     timeSlider->setTickPosition(QSlider::TicksBelow);
     connect(timeSlider, &QAbstractSlider::valueChanged, this, [this]() {
             this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
-            this->currentImage = imageSequence[timeSlider->value() - timeSlider->minimum()];
+            this->image = imageSequence[timeSlider->value() - timeSlider->minimum()];
             this->tLabel->setText(tr("t= %1").arg(timeSlider->value()));
     });
     this->view->graphicsView->setScene(scenes[timeSlider->value() - timeSlider->minimum()]);
