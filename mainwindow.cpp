@@ -11,7 +11,7 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow{parent}
+    : QMainWindow{parent}, tabWidget(new QTabWidget(this))
 {
     setWindowTitle(tr("r.e. visualizer"));
 
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(seemoreAct, &QAction::triggered, this, [this](){this->seeSeemore();});
     connect(whylowerAct, &QAction::triggered, this, [this](){this->seeWhylower();});
     fileMenu->addAction(saveasimageAct);
-    // saveasimageAct->setIcon(findIcon());
+
     fileMenu->addAction(saveasimagesequenceAct);
     fileMenu->addAction(saveprojectAct);
     fileMenu->addSeparator();
@@ -54,12 +54,10 @@ MainWindow::MainWindow(QWidget *parent)
     Visualize2D *vis2d = new Visualize2D(this);
     Visualize3D *vis3d = new Visualize3D(this);
 
-    tabWidget = new QTabWidget(this);
     tabWidget->setTabsClosable(true);
     tabWidget->addTab(vis2d, tr("2d vis"));
     tabWidget->addTab(vis3d, tr("3d vis"));
     this->setCentralWidget(tabWidget);
-
 
 
     connect(add2dtabAct, &QAction::triggered, this, [this](){
@@ -72,37 +70,24 @@ MainWindow::MainWindow(QWidget *parent)
         tabWidget->setCurrentWidget(tabWidget->widget(count));
     });
 
-
     connect(saveasimageAct, &QAction::triggered, this, [this](){saveasimage();});
     connect(saveasimagesequenceAct, &QAction::triggered, this, [this](){saveasimagesequence();});
     connect(saveprojectAct, &QAction::triggered, this, [this](){saveproject();});
     connect(loadprojectAct, &QAction::triggered, this, [this](){openProject();});
 }
 
-// QIcon MainWindow::findIcon () {
 
-//     if (tabWidget->currentWidget() != nullptr) {
-//     auto *active = dynamic_cast<SavableWidget *>(tabWidget->currentWidget());
-//     if (active->savable) {
-//         if (active->image != nullptr) return QIcon(QPixmap::fromImage(*active->image));
-
-//         else return QIcon();
-
-//     }
-//     else   QIcon();
-//     }
-//     else return QIcon();
-// }
 
 void MainWindow::seeHelp() {
     showMsgBox("도움", "JavaScript를 사용하여 함수를 입력하세요. 입출력이 자연수인지, 인자 수가 정확한지를 확인하세요. 하단의 입력창에서 범위를 설정할 수 있습니다.");
 }
 
 void MainWindow::seeSeemore() {
-    showMsgBox(tr("설명"), "버전: test v0.04082008\n현재는 2차원, 3차원만 있습니다(4차원 이상을 시각화하는(슬라이더를 더 추가해서 2차원 단면을 잔뜩 만드는 것보다 더 좋은) 방법이 있으면 당신이 직접 만드십시오). r.e.set을 도메인으로 정하지 않으면 도메인 아닌 곳에서 멈춰서 영원히 값이 안 나오는 것이 설계 의도이며 실제로 그렇게 되는지는 모릅니다(아마 그렇게 될 듯). 더 상세한 도메인을 입력받는 건 아직 안 만들었으니 입력에 주의하세요." );
+    showMsgBox(tr("설명"), "버전: test v0.04091257\n현재는 2차원, 3차원만 있습니다(4차원 이상을 시각화하는(슬라이더를 더 추가해서 2차원 단면을 잔뜩 만드는 것보다 더 좋은) 방법이 있으면 당신이 직접 만드십시오). r.e.set을 도메인으로 정하지 않으면 도메인 아닌 곳에서 멈춰서 영원히 값이 안 나오는 것이 설계 의도이며 실제로 그렇게 되는지는 모릅니다(아마 그렇게 될 듯). 더 상세한 도메인을 입력받는 건 아직 안 만들었으니 입력에 주의하세요." );
 }
 
 void MainWindow::seeWhylower() {
+
     showMsgBox("왜 모든 것이 소문자인가요?", "마음에 들지 않으면 pull request 보내십시오.");
 }
 

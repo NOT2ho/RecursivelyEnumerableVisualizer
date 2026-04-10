@@ -8,8 +8,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    void saveasimage_seticon();
 
 private:
+
     void seeHelp();
     void seeSeemore();
     void saveasimage();
@@ -18,6 +20,7 @@ private:
     void saveproject() ;
     void openProject();
     void seeWhylower();
+
 
     QIcon findIcon();
     QTabWidget *tabWidget;
