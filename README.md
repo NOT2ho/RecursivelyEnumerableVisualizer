@@ -1,3 +1,5 @@
+i'm c++ newbie and this project is not done 
+
 # r.e. vis
 this is my cat, mimi.
 
