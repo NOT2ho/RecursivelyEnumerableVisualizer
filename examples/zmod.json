@@ -1,0 +1,15 @@
+{
+    "dimension": 3,
+    "domains": {
+        "t1": 2,
+        "t2": 18,
+        "x1": 0,
+        "x2": 17,
+        "y1": 0,
+        "y2": 17
+    },
+    "functions": {
+        "color-function": "main: (i) => {\n\tfunction color(i) {\n\t\tlet c = 255\t\n\t\tif (i == -1) return colorHelper(255, 255, 255)\n\t\tif (i == 0) \n\t\t\tc = 0\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}",
+        "pixel-function": "main: (x, y, z) => { \n\tfunction calc(x, y, z) {\n\t\tif ((x < z && y < z)) \n\t\t\treturn (x * y) % z \n\t\telse return -1\n\t\n\t} \n return calc(x, y, z) \n}"
+    }
+}
