@@ -257,7 +257,8 @@ void Visualize2D::populateScene(QString sf, QString sf2, std::vector<int> dom, Q
         int yy = dom[2];
         for (int j = dom[2]*10; j < dom[3]*10; j += 10) {
             auto val = valarr.getValue(xx,yy);
-            QColor color(valarr.getColor(val));
+            //qInfo() << xx << ", " << yy;
+            QColor color(valarr.getColor(val, xx, yy));
             DrawPixel *item = new DrawPixel(color, xx, yy, val);
             item->setPos(QPointF(i, j));
             scene->addItem(item);

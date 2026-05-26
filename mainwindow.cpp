@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *saveasimageAct = new QAction("save image", this);
     QAction *loadprojectAct = new QAction("load project", this);
     QAction *saveasimagesequenceAct = new QAction("save image sequence", this);
+    QAction *whynosynthhighlightAct = new QAction("why no syntax highlighter?", this);
 
     QAction *saveprojectAct = new QAction("save project", this);
     QAction *helpAct = new QAction("help..", this);
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     helpMenu->addAction(helpAct);
     helpMenu->addAction(seemoreAct);
     helpMenu->addAction(whylowerAct);
+    helpMenu->addAction(whynosynthhighlightAct);
     windowMenu->addAction(add2dtabAct);
     windowMenu->addAction(add3dtabAct);
 
@@ -74,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(saveasimagesequenceAct, &QAction::triggered, this, [this](){saveasimagesequence();});
     connect(saveprojectAct, &QAction::triggered, this, [this](){saveproject();});
     connect(loadprojectAct, &QAction::triggered, this, [this](){openProject();});
+    connect(whynosynthhighlightAct, &QAction::triggered, this, [this](){seeWhynosynthhighlight();});
 }
 
 
@@ -83,7 +86,7 @@ void MainWindow::seeHelp() {
 }
 
 void MainWindow::seeSeemore() {
-    showMsgBox(tr("설명"), "버전: test v0.04091257\n현재는 2차원, 3차원만 있습니다(4차원 이상을 시각화하는(슬라이더를 더 추가해서 2차원 단면을 잔뜩 만드는 것보다 더 좋은) 방법이 있으면 당신이 직접 만드십시오). r.e.set을 도메인으로 정하지 않으면 도메인 아닌 곳에서 멈춰서 영원히 값이 안 나오는 것이 설계 의도이며 실제로 그렇게 되는지는 모릅니다(아마 그렇게 될 듯). 더 상세한 도메인을 입력받는 건 아직 안 만들었으니 입력에 주의하세요." );
+    showMsgBox(tr("설명"), "버전: test v0.0417<br></br><a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer'>github</a>" );
 }
 
 void MainWindow::seeWhylower() {
@@ -91,10 +94,15 @@ void MainWindow::seeWhylower() {
     showMsgBox("왜 모든 것이 소문자인가요?", "마음에 들지 않으면 pull request 보내십시오.");
 }
 
+void MainWindow::seeWhynosynthhighlight() {
+
+    showMsgBox("코드가 그냥 텍스트인 것이 마음에 들지 않나요?", "불만이 있으시면 <a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer/pulls'>여기</a>를 누르십시오.");
+}
 
 void MainWindow::showMsgBox(QString title, QString text) {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(title);
+    msgBox.setTextFormat(Qt::RichText);
     msgBox.setText(text);
     msgBox.exec();
 }

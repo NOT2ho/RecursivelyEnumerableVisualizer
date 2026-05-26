@@ -20,7 +20,7 @@ private:
     void saveproject() ;
     void openProject();
     void seeWhylower();
-
+    void seeWhynosynthhighlight();
 
     QIcon findIcon();
     QTabWidget *tabWidget;
