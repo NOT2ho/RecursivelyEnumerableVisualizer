@@ -1,0 +1,13 @@
+{
+    "dimension": 2,
+    "domains": {
+        "x1": 0,
+        "x2": 200,
+        "y1": 0,
+        "y2": 200
+    },
+    "functions": {
+        "color-function": "main: (i) => {\n\tfunction color(i) {\n\t\tlet c = 0\n\t\tif (i==2) return colorHelper(200,20,20)\n\t\tif (i) c = 250\n\n\t\treturn colorHelper(c, c, c)\n\t}\n\tfunction colorHelper(r, g, b) {\n\t\treturn b + g * 0x100 + r* 0x10000\n\t}\n\treturn color(i)\n}",
+        "pixel-function": "main: (x, y) => { \nconst sqr = (a, b) => {if ( 0.7*a ** 3 - 2* a ** 2 + a + 3- b< 0) \nreturn 0\nelse return 1}\n/*\nconst outline = (a,b,r,f) => {\nif ((f(a+1/r, b) || f(a,b-1/r))&& !f(a,b))\nreturn 0;\nelse return 1; \n}*/\n\n\nconst outline = (a,b,r,f) => {\n\n\tif(!f(a, b)) return 1\n\tconst dx = [-1, 0, 1, -1, 1, -1, 0, 1]\n\tconst dy = [-1, -1, -1, 0, 0, 1, 1, 1]\n\tfor(let i=0; i<8; i++) {\n\t\tconst newa = a+dx[i]/r\n\t\tconst newb = b+dy[i]/r\n\t\tif(!f(newa, newb))\n\t\t\treturn 0\n\t}\n\treturn 1\n}\n\n\n\tfunction calc(x, y) { \n\tlet x2 = (x-40)/20\n\tlet y2 = (y-40)/20\n\tlet v = outline(x2, y2, 20, sqr)\n\tif ((x == 40 || y ==  40 || (!(x2 * 20 % 20) && y == 41) || (!(x2 * 20 % 100) && y == 42) || (!(y2 * 20 % 20) && x == 41) || (!((y2) * 20 % 100) && x == 42)) && v) return 2;\n\treturn v\n\t\n\t} \n return calc(x, y) \n}"
+    }
+}
