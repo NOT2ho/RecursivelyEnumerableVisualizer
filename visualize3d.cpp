@@ -39,7 +39,7 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension, int xstart, int xend, i
     makeFrames(this->pixel_function, this->color_function, {this->xstart, this->xend, this->ystart, this->yend, this->tstart, this->tend});
 
 
-    QFont font ("Ubuntu Mono");
+    QFont font ("Lucida Console");
     font.setStyleHint(QFont::Monospace);
 
     tLabel->setText("t= ");
@@ -232,10 +232,10 @@ Visualize3D::Visualize3D(QWidget *parent, int dimension, int xstart, int xend, i
 
     QSplitter *splitter = new QSplitter();
     splitter->setChildrenCollapsible(false);
-    splitter->addWidget(viewLayoutBox);
     splitter->addWidget(textInputBox);
     splitter->addWidget(textInput2Box);
-    splitter->setStretchFactor(0,2);
+    splitter->addWidget(viewLayoutBox);
+    splitter->setStretchFactor(0,1);
     splitter->setStretchFactor(1,1);
     splitter->setStretchFactor(2,1);
 

@@ -86,7 +86,7 @@ void MainWindow::seeHelp() {
 }
 
 void MainWindow::seeSeemore() {
-    showMsgBox(tr("설명"), "버전: test v0.0417<br></br><a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer'>github</a>" );
+    showMsgBox(tr("설명"), "버전: test v0.06091<br></br><a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer'>github</a>" );
 }
 
 void MainWindow::seeWhylower() {
@@ -96,7 +96,7 @@ void MainWindow::seeWhylower() {
 
 void MainWindow::seeWhynosynthhighlight() {
 
-    showMsgBox("코드가 그냥 텍스트인 것이 마음에 들지 않나요?", "불만이 있으시면 <a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer/pulls'>여기</a>를 누르십시오.");
+    showMsgBox("신택스 하이라이터가 없는 것이 마음에 들지 않나요?", "불만이 있으시면 <a href='https://github.com/NOT2ho/RecursivelyEnumerableVisualizer/pulls'>여기</a>를 누르십시오.");
 }
 
 void MainWindow::showMsgBox(QString title, QString text) {

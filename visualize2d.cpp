@@ -32,7 +32,7 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension, int xstart, int xend, i
     View *view = new View();
     view->graphicsView->setScene(scene);
 
-    QFont font ("Ubuntu Mono");
+    QFont font ("Lucida Console");
     font.setStyleHint(QFont::Monospace);
 
 
@@ -145,9 +145,9 @@ Visualize2D::Visualize2D(QWidget *parent, int dimension, int xstart, int xend, i
 
     QSplitter *splitter = new QSplitter();
     splitter->setChildrenCollapsible(false);
-    splitter->addWidget(view);
     splitter->addWidget(textInputBox);
     splitter->addWidget(textInput2Box);
+    splitter->addWidget(view);
     splitter->setStretchFactor(0,2);
     splitter->setStretchFactor(1,1);
     splitter->setStretchFactor(2,1);

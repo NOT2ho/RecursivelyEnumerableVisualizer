@@ -39,8 +39,8 @@ int valueArray2D::getValue (int a, int b) {
 
 QColor valueArray2D::getColor(int a, int x, int y) {
     int res = cf.call(QJSValueList{a}).toInt();
-    if(res < 0)
-        return QJSValueList{def.property(x).property(y).toInt();
-    else
+    // if(res < 0)
+    //     return QJSValueList{def.property(x).property(y).toInt()};
+    // else
         return res;
 }
